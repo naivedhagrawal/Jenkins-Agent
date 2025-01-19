@@ -1,50 +1,60 @@
-# Base image: Jenkins inbound agent (alpine-based)
-FROM jenkins/inbound-agent:4.13-4-alpine
+# Use the official Jenkins inbound agent base image
+FROM jenkins/inbound-agent:latest as jnlp
 
 # Switch to root to install dependencies
 USER root
 
-# Set environment variables
+# Environment variables
 ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
     PYTHON_VENV=/opt/venv
 
-# Update and install required tools
-RUN apk add --no-cache \
-    openjdk17 \
-    python3 \
-    py3-pip \
-    py3-virtualenv \
+# Update and install the latest tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Development tools
+    openjdk-17-jdk \
+    python3.10 \
+    python3-pip \
+    python3-venv \
     nodejs \
     npm \
-    docker-cli \
-    bash \
-    git \
-    curl \
-    openssh \
-    ca-certificates \
-    zip \
-    unzip \
-    tar \
-    shadow \
-    build-base \
+    build-essential \
     libffi-dev \
-    openssl-dev && \
-    python3 -m venv $PYTHON_VENV && \
-    $PYTHON_VENV/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    mkdir -p $JENKINS_AGENT_WORKDIR && \
-    chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
+    libssl-dev \
+    ca-certificates \
+    curl \
+    wget \
+    unzip \
+    zip \
+    tar \
+    git \
+    openssh-client \
+    docker.io \
+    docker-compose-plugin \
+    vim \
+    jq \
+    ruby-full \
+    rsync \
+    # Clean up
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    # Set up Python virtual environment
+    && python3 -m venv $PYTHON_VENV \
+    && $PYTHON_VENV/bin/pip install --no-cache-dir --upgrade pip setuptools wheel \
+    # Create Jenkins agent workspace
+    && mkdir -p $JENKINS_AGENT_WORKDIR \
+    && chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
 # Add Jenkins user to the Docker group for Docker CLI access
-RUN addgroup -S docker && usermod -aG docker jenkins
+RUN usermod -aG docker jenkins
 
-# Switch back to the Jenkins user
+# Set PATH for Python virtual environment
+ENV PATH="$PYTHON_VENV/bin:$PATH"
+
+# Switch back to Jenkins user
 USER jenkins
 
 # Set working directory
 WORKDIR $JENKINS_AGENT_WORKDIR
 
-# Add Python virtual environment to PATH
-ENV PATH="$PYTHON_VENV/bin:$PATH"
-
-# Entry point for the Jenkins agent
+# Default entrypoint from base image
 ENTRYPOINT ["jenkins-agent"]
