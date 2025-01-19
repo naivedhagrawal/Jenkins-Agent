@@ -26,6 +26,8 @@ RUN apk add --no-cache \
     libffi-dev \
     openssl-dev \
     docker-cli \
+    docker \
+    docker-compose \
     zip \
     unzip \
     tar \

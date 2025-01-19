@@ -27,24 +27,14 @@ pipeline {
             }
         }
 
-        stage('Login to Docker Hub') {
+        stage('Login and Push to Docker Hub') {
             steps {
-                script {
-                    // Login to Docker Hub using credentials from Jenkins
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
+                withDockerRegistry([url: 'https://registry.hub.docker.com', credentialsId: DOCKER_HUB_CREDENTIALS]) {
+                    sh """
+                        /* groovylint-disable-next-line NestedBlockDepth */
                         echo 'Successfully logged in to Docker Hub'
-                    }
-                }
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    // Push the Docker image to Docker Hub
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_CREDENTIALS) {
-                        sh 'docker push $DOCKER_IMAGE_NAME:$DOCKER_TAG'
-                    }
+                        docker push $DOCKER_IMAGE_NAME:$DOCKER_TAG
+                    """
                 }
             }
         }
