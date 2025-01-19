@@ -17,8 +17,8 @@ RUN apt-get update && \
     curl \
     bash \
     openssh-client \
-    python3 \
-    python3-pip \
+    #python3 \
+    #python3-pip \
     nodejs \
     npm \
     gcc \
