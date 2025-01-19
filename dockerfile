@@ -1,5 +1,5 @@
-# Use the official Jenkins inbound agent base image
-FROM jenkins/inbound-agent:latest as jnlp
+# Use the Jenkins inbound agent base image
+FROM jenkins/inbound-agent as jnlp
 
 # Switch to root to install dependencies
 USER root
@@ -8,11 +8,11 @@ USER root
 ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
     PYTHON_VENV=/opt/venv
 
-# Update and install the latest tools
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    # Development tools
+# Update package sources and install tools
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     openjdk-17-jdk \
-    python3.10 \
+    python3 \
     python3-pip \
     python3-venv \
     nodejs \
@@ -33,21 +33,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     vim \
     jq \
     ruby-full \
-    rsync \
-    # Clean up
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    # Set up Python virtual environment
-    && python3 -m venv $PYTHON_VENV \
-    && $PYTHON_VENV/bin/pip install --no-cache-dir --upgrade pip setuptools wheel \
-    # Create Jenkins agent workspace
-    && mkdir -p $JENKINS_AGENT_WORKDIR \
-    && chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
+    rsync && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    python3 -m venv $PYTHON_VENV && \
+    $PYTHON_VENV/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    mkdir -p $JENKINS_AGENT_WORKDIR && \
+    chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
-# Add Jenkins user to the Docker group for Docker CLI access
+# Add Jenkins user to Docker group for Docker CLI access
 RUN usermod -aG docker jenkins
 
-# Set PATH for Python virtual environment
+# Add Python virtual environment to PATH
 ENV PATH="$PYTHON_VENV/bin:$PATH"
 
 # Switch back to Jenkins user
