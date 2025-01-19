@@ -20,8 +20,8 @@ RUN apk add --no-cache \
     py3-virtualenv \
     nodejs \
     npm \
+    docker-cli \
     make \
-    docker-io \
     openssh-client \
     build-base \
     libffi-dev \
