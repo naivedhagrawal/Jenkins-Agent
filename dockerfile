@@ -1,28 +1,23 @@
-# Use the official Jenkins inbound agent base image
-FROM jenkins/inbound-agent:4.13-4-alpine
+# Use the official Jenkins agent image as the base
+FROM jenkins/inbound-agent:latest
 
-# Set environment variables
-ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
-    JENKINS_URL=http://<JENKINS_CONTROLLER_URL>:8080 \
-    JENKINS_SECRET=<AGENT_SECRET> \
-    JENKINS_AGENT_NAME=<AGENT_NAME>
-
-# Install additional tools
+# Install Docker
 USER root
-RUN apk add --no-cache \
-    docker-cli \
-    bash \
-    git \
-    curl \
-    openjdk17 \
-    shadow
+RUN apt-get update && \
+    apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
+    apt-get update && \
+    apt-get install -y docker-ce-cli docker-ce
 
-# Add Jenkins to the Docker group for Docker CLI access
+# Configure Docker to run as non-root user
+RUN groupadd docker
 RUN usermod -aG docker jenkins
 
-# Set working directory
-USER jenkins
-WORKDIR $JENKINS_AGENT_WORKDIR
+# Install Docker Compose
+RUN curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose
 
-# Use the entrypoint from the base image
-ENTRYPOINT ["jenkins-agent"]
+# Enable DinD
+RUN mkdir -p /var/lib/docker
+VOLUME /var/lib/docker
