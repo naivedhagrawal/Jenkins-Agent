@@ -1,34 +1,32 @@
-# Use the latest Docker-in-Docker image as the base
-FROM docker:24.0.5-dind
+# Use the official Docker image
+FROM docker:latest
 
-# Install required dependencies
+# Set environment variables
+ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
+    JENKINS_URL=http://<JENKINS_CONTROLLER_URL>:8080 \
+    JENKINS_SECRET=<AGENT_SECRET> \
+    JENKINS_AGENT_NAME=<AGENT_NAME>
+
+# Install additional tools for Jenkins jobs
 RUN apk add --no-cache \
     openjdk17 \
     git \
     curl \
     bash \
     openssh \
-    shadow \
-    ca-certificates
-
-# Set environment variables
-ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent
-ENV JENKINS_HOME=/home/jenkins
-
-# Create Jenkins user and workspace
-RUN addgroup -S jenkins && \
-    adduser -S jenkins -G jenkins && \
+    ca-certificates \
+    shadow && \
     mkdir -p $JENKINS_AGENT_WORKDIR && \
+    addgroup -S jenkins && \
+    adduser -S jenkins -G jenkins && \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
+# Set up Docker permissions for the Jenkins user
+RUN groupadd -g 999 docker && usermod -aG docker jenkins
+
 # Download Jenkins agent jar
-ADD https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/3104.1/remoting-3104.1.jar /usr/share/jenkins/agent.jar
-
-# Change ownership of the agent jar
-RUN chown jenkins:jenkins /usr/share/jenkins/agent.jar
-
-# Add Jenkins user to the Docker group
-RUN usermod -aG docker jenkins
+RUN curl -fsSL https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/latest/remoting-latest.jar -o /usr/share/jenkins/agent.jar && \
+    chown jenkins:jenkins /usr/share/jenkins/agent.jar
 
 # Switch to Jenkins user
 USER jenkins
@@ -36,8 +34,5 @@ USER jenkins
 # Set the working directory
 WORKDIR $JENKINS_AGENT_WORKDIR
 
-# Expose volume for Jenkins workspace
-VOLUME $JENKINS_AGENT_WORKDIR
-
-# Set the entrypoint for the Kubernetes plugin
+# Entry point for Jenkins agent
 ENTRYPOINT ["java", "-jar", "/usr/share/jenkins/agent.jar"]
