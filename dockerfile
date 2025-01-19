@@ -9,8 +9,8 @@ ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
     DOCKER_VERSION=20.10.24
 
 # Update and install dependencies
-RUN dnf -y update && \
-    dnf -y install \
+RUN yum -y update && \
+    yum -y install \
     java-11-openjdk \
     git \
     curl \
@@ -34,7 +34,7 @@ RUN dnf -y update && \
     findutils \
     vim && \
     pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
-    dnf clean all
+    yum clean all
 
 # Set up Docker CLI (if required)
 RUN curl -fsSL https://download.docker.com/linux/static/stable/$(uname -m)/docker-${DOCKER_VERSION}.tgz | tar -xz -C /usr/local/bin --strip-components=1 && \
