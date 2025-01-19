@@ -1,5 +1,5 @@
 # Use the Jenkins inbound agent base image
-FROM jenkins/inbound-agent as jnlp
+FROM jenkins/inbound-agent:latest
 
 # Switch to root to install dependencies
 USER root
