@@ -40,7 +40,7 @@ RUN apk add --no-cache \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
 RUN usermod -aG docker jenkins
-RUN echo "jenkins ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers    
+RUN newgrp docker   
 
 # Switch to Jenkins user
 USER jenkins
