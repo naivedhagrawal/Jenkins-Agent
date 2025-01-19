@@ -1,90 +1,57 @@
 # Use the official Jenkins inbound agent image as the base
 FROM jenkins/inbound-agent:latest
 
-# Update the system and install essential tools
+# Switch to root to install dependencies
 USER root
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    software-properties-common \
-    build-essential \
-    curl \
+
+# Set environment variables
+ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
+    DOCKER_VERSION=20.10.24
+
+# Update and install dependencies
+RUN dnf -y update && \
+    dnf -y install \
+    java-11-openjdk \
     git \
-    wget \
+    curl \
+    bash \
+    openssh \
+    python3 \
+    python3-pip \
+    nodejs \
+    npm \
+    gcc \
+    make \
+    libffi-devel \
+    openssl-devel \
     zip \
     unzip \
     tar \
-    openssh-client \
-    python3 \
-    python3-pip \
-    ruby \
-    ruby-dev \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    shadow-utils \
+    docker \
+    wget \
+    podman \
+    findutils \
+    vim && \
+    pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
+    dnf clean all
 
-# ----------- Install Docker CLI -----------
-#RUN curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-24.0.5.tgz | tar xz --strip-components=1 -C /usr/local/bin
+# Set up Docker CLI (if required)
+RUN curl -fsSL https://download.docker.com/linux/static/stable/$(uname -m)/docker-${DOCKER_VERSION}.tgz | tar -xz -C /usr/local/bin --strip-components=1 && \
+    chmod +x /usr/local/bin/docker
 
-# Add Docker's official GPG key:
-RUN apt-get update
-RUN apt-get install ca-certificates curl
-RUN install -m 0755 -d /etc/apt/keyrings
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-RUN chmod a+r /etc/apt/keyrings/docker.asc
-    
-# Add the repository to Apt sources:
-RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] \
-    https://download.docker.com/linux/debian bullseye stable" | \
-    tee /etc/apt/sources.list.d/docker.list > /dev/null
-RUN apt-get update
-RUN apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+# Create workspace directory
+RUN mkdir -p $JENKINS_AGENT_WORKDIR && \
+    chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
-
-
-# ----------- Install Latest Maven -----------
-RUN curl -fsSL https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz | tar -xz -C /opt/ \
-    && ln -s /opt/apache-maven-3.9.5/bin/mvn /usr/bin/mvn
-
-# ----------- Install Latest Gradle -----------
-ENV GRADLE_VERSION=8.4
-RUN curl -fsSL https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -o gradle.zip \
-    && unzip gradle.zip -d /opt/ \
-    && rm gradle.zip \
-    && ln -s /opt/gradle-${GRADLE_VERSION}/bin/gradle /usr/bin/gradle
-
-# ----------- Install Latest Node.js and npm -----------
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g yarn
-
-# ----------- Install Latest Docker Compose -----------
-RUN curl -fsSL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose \
-    && chmod +x /usr/local/bin/docker-compose
-
-# ----------- Install Latest Go (Golang) -----------
-ENV GO_VERSION=1.21.1
-RUN curl -fsSL https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz | tar -C /usr/local -xzf - \
-    && ln -s /usr/local/go/bin/* /usr/bin/
-
-# ----------- Install Latest .NET SDK -----------
-ENV DOTNET_SDK_VERSION=7.0
-RUN wget https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh \
-    && chmod +x dotnet-install.sh \
-    && ./dotnet-install.sh --channel ${DOTNET_SDK_VERSION} --install-dir /usr/share/dotnet \
-    && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet \
-    && rm dotnet-install.sh
-
-# ----------- upgrade Python Packages -----------
-#RUN pip3 install --no-cache-dir --upgrade pip setuptools
-
-# ----------- Install Ruby Bundler -----------
-RUN gem install bundler
-
-# Switch back to Jenkins user
+# Switch back to the Jenkins user
 USER jenkins
 
-# Default environment variables
-ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent
-
-# Expose Jenkins agent's default port
-EXPOSE 50000
-
-# Work directory
+# Set working directory
 WORKDIR $JENKINS_AGENT_WORKDIR
+
+# Expose the volume for Jenkins workspace
+VOLUME $JENKINS_AGENT_WORKDIR
+
+# Use the default entrypoint from the base image
+ENTRYPOINT ["jenkins-agent"]
