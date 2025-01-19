@@ -33,7 +33,7 @@ RUN apt-get update && \
     software-properties-common \
     build-essential \
     vim && \
-    pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
+    #pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
