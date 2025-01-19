@@ -1,50 +1,43 @@
-# Use the official Jenkins inbound agent base image
-FROM jenkins/inbound-agent:latest
+# Use the official Jenkins inbound agent as the base image
+FROM jenkins/inbound-agent:latest-alpine
 
 # Switch to root to install additional dependencies
 USER root
 
 # Set environment variables
-ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
-    DEBIAN_FRONTEND=noninteractive
+ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent
 
-# Update the system and install dependencies
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends \
-    default-jre \
+# Update and install dependencies
+RUN apk add --no-cache \
+    openjdk11 \
     git \
     curl \
     bash \
-    openssh-client \
-    #python3 \
-    #python3-pip \
+    openssh \
+    python3 \
+    py3-pip \
     nodejs \
     npm \
     gcc \
+    g++ \
     make \
     libffi-dev \
-    libssl-dev \
-    docker.io \
-    unzip \
+    openssl-dev \
+    docker-cli \
     zip \
+    unzip \
     tar \
     ca-certificates \
-    software-properties-common \
-    build-essential \
+    shadow \
     vim && \
-    #pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Create Jenkins agent workspace directory
-RUN mkdir -p $JENKINS_AGENT_WORKDIR && \
+    pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
+    mkdir -p $JENKINS_AGENT_WORKDIR && \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
 # Switch back to the Jenkins user
 USER jenkins
 
-# Set the working directory
+# Set working directory
 WORKDIR $JENKINS_AGENT_WORKDIR
 
 # Expose volume for Jenkins workspace
