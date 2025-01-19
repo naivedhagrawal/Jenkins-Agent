@@ -3,14 +3,14 @@ FROM alpine:latest
 
 # Set environment variables
 ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
-    AGENT_JAR_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/latest/remoting-latest.jar \
+    AGENT_JAR_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/3107.1/remoting-3107.1.jar \
     AGENT_JAR=/usr/share/jenkins/agent.jar
 
 # Switch to root user to install dependencies
 USER root
 
-# Install required packages
-RUN apk add --no-cache \
+# Update repositories and install dependencies
+RUN apk update && apk add --no-cache \
     openjdk17 \
     git \
     bash \
@@ -20,16 +20,16 @@ RUN apk add --no-cache \
     py3-virtualenv \
     nodejs \
     npm \
-    docker-cli \
     make \
+    docker-cli \
     openssh-client \
     build-base \
     libffi-dev \
     openssl-dev \
     jq && \
-    # Create Jenkins user and working directory
-    adduser -D -h $JENKINS_AGENT_WORKDIR jenkins && \
+    # Manually create home directory
     mkdir -p $JENKINS_AGENT_WORKDIR && \
+    adduser -D -h $JENKINS_AGENT_WORKDIR jenkins && \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR && \
     # Download Jenkins remoting agent JAR
     curl -fsSL $AGENT_JAR_URL -o $AGENT_JAR && \
@@ -44,7 +44,6 @@ WORKDIR $JENKINS_AGENT_WORKDIR
 
 # Expose volume for the workspace
 VOLUME $JENKINS_AGENT_WORKDIR
-VOLUME /var/run/docker.sock
 
 # Set entrypoint for the Jenkins inbound agent
 ENTRYPOINT ["java", "-jar", "/usr/share/jenkins/agent.jar"]
