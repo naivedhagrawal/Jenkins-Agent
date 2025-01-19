@@ -1,6 +1,11 @@
 /* groovylint-disable-next-line CompileStatic */
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'docker:19.03-dind'  // Docker-in-Docker image
+            args '--privileged'        // Required to run Docker inside Docker
+        }
+    }
 
     environment {
         // Jenkins secret containing Docker Hub credentials
