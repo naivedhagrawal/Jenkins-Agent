@@ -1,5 +1,5 @@
 # Base image for Jenkins Kubernetes agent
-FROM jenkins/inbound-agent:4.14.2-4-jdk11
+FROM jenkins/inbound-agent
 
 # Switch to root to install additional tools
 USER root
