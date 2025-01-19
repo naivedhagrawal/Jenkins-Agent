@@ -1,5 +1,5 @@
 # Base image: Jenkins inbound agent (alpine-based)
-FROM jenkins/inbound-agent:4.13-4-alpine as jnlp
+FROM jenkins/inbound-agent:4.13-4-alpine
 
 # Switch to root to install dependencies
 USER root
