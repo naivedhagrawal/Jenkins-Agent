@@ -19,7 +19,7 @@ pipeline {
           sh '/bin/busybox'
         }
         {
-          container('docker') {
+        container('docker') {
             sh 'echo docker_CONTAINER_ENV_VAR = ${CONTAINER_ENV_VAR}'
             sh 'docker -version'
           }
