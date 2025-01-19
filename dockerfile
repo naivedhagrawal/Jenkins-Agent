@@ -1,11 +1,12 @@
-# Use the official Jenkins inbound agent as the base image
+# Use the official Jenkins inbound agent base image
 FROM jenkins/inbound-agent:latest-alpine
 
 # Switch to root to install additional dependencies
 USER root
 
 # Set environment variables
-ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent
+ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
+    PYTHON_VENV=/opt/venv
 
 # Update and install dependencies
 RUN apk add --no-cache \
@@ -16,6 +17,7 @@ RUN apk add --no-cache \
     openssh \
     python3 \
     py3-pip \
+    py3-virtualenv \
     nodejs \
     npm \
     gcc \
@@ -30,12 +32,16 @@ RUN apk add --no-cache \
     ca-certificates \
     shadow \
     vim && \
-    pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
+    python3 -m venv $PYTHON_VENV && \
+    $PYTHON_VENV/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
     mkdir -p $JENKINS_AGENT_WORKDIR && \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
-# Switch back to the Jenkins user
+# Switch to Jenkins user
 USER jenkins
+
+# Set up the Python virtual environment for all users
+ENV PATH="$PYTHON_VENV/bin:$PATH"
 
 # Set working directory
 WORKDIR $JENKINS_AGENT_WORKDIR
