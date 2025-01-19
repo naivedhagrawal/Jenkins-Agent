@@ -1,54 +1,24 @@
-/* groovylint-disable-next-line CompileStatic */
+
 pipeline {
-    agent {
-        kubernetes { yamlFile 'pod.yaml' }
+  agent {
+    kubernetes {
+      yamlFile 'pod.yaml'
     }
-
-    environment {
-        // Jenkins secret containing Docker Hub credentials
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials')
-        // Replace with your Docker Hub username and image name
-        DOCKER_IMAGE_NAME = 'naivedh/jenkins-agent-all-in-one'
-        DOCKER_TAG = 'latest'  // Or you can use a dynamic tag, e.g., Git commit hash
+  }
+  stages {
+    stage('Run maven') {
+      steps {
+        sh 'set'
+        sh "echo OUTSIDE_CONTAINER_ENV_VAR = ${CONTAINER_ENV_VAR}"
+        container('maven') {
+          sh 'echo MAVEN_CONTAINER_ENV_VAR = ${CONTAINER_ENV_VAR}'
+          sh 'mvn -version'
+        }
+        container('busybox') {
+          sh 'echo BUSYBOX_CONTAINER_ENV_VAR = ${CONTAINER_ENV_VAR}'
+          sh '/bin/busybox'
+        }
+      }
     }
-
-    stages {
-        stage('Checkout') {
-            steps {
-                // Checkout your repository
-                checkout scm
-                sh "docker --version"
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    // Build the Docker image
-                    sh 'docker build -t $DOCKER_IMAGE_NAME:$DOCKER_TAG .'
-                }
-            }
-        }
-
-        stage('Login and Push to Docker Hub') {
-            steps {
-                withDockerRegistry([url: 'https://registry.hub.docker.com', credentialsId: DOCKER_HUB_CREDENTIALS]) {
-                    sh """
-                        /* groovylint-disable-next-line NestedBlockDepth */
-                        echo 'Successfully logged in to Docker Hub'
-                        docker push $DOCKER_IMAGE_NAME:$DOCKER_TAG
-                    """
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Docker image has been successfully pushed to Docker Hub!'
-        }
-        failure {
-            echo 'Pipeline failed, check the logs for details.'
-        }
-    }
+  }
 }
