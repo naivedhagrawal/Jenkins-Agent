@@ -1,51 +1,40 @@
-# Use the Jenkins inbound agent base image
-FROM jenkins/inbound-agent:latest
+# Use Jenkins inbound agent with Alpine base
+FROM jenkins/inbound-agent:latest-alpine
 
-# Switch to root to install dependencies
+# Switch to root to install additional dependencies
 USER root
 
 # Environment variables
 ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
-    PYTHON_VENV=/opt/venv
+    DOCKER_VERSION=latest
 
-# Update package sources and install tools
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    openjdk-17-jdk \
+# Install Docker and required tools
+RUN apk add --no-cache \
+    openjdk17 \
+    docker-cli \
+    bash \
+    git \
+    curl \
+    openssh-client \
     python3 \
-    python3-pip \
-    python3-venv \
+    py3-pip \
+    py3-virtualenv \
     nodejs \
     npm \
-    build-essential \
+    build-base \
     libffi-dev \
-    libssl-dev \
+    openssl-dev \
     ca-certificates \
-    curl \
-    wget \
-    unzip \
-    zip \
-    tar \
-    git \
-    openssh-client \
-    docker.io \
-    docker-compose-plugin \
-    vim \
+    shadow \
     jq \
-    ruby-full \
-    rsync && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    python3 -m venv $PYTHON_VENV && \
-    $PYTHON_VENV/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    zip \
+    unzip && \
+    # Create Jenkins agent workspace
     mkdir -p $JENKINS_AGENT_WORKDIR && \
-    chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
-
-# Add Jenkins user to Docker group for Docker CLI access
-RUN usermod -aG docker jenkins
-
-# Add Python virtual environment to PATH
-ENV PATH="$PYTHON_VENV/bin:$PATH"
+    chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR && \
+    # Add Jenkins user to the Docker group for CLI access
+    groupadd -g 999 docker && \
+    usermod -aG docker jenkins
 
 # Switch back to Jenkins user
 USER jenkins
@@ -53,5 +42,5 @@ USER jenkins
 # Set working directory
 WORKDIR $JENKINS_AGENT_WORKDIR
 
-# Default entrypoint from base image
+# Use the default entrypoint from the base image
 ENTRYPOINT ["jenkins-agent"]
