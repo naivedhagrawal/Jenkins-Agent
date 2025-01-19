@@ -25,7 +25,6 @@ RUN apk add --no-cache \
     make \
     libffi-dev \
     openssl-dev \
-    docker-cli \
     docker \
     docker-compose \
     zip \
@@ -34,14 +33,18 @@ RUN apk add --no-cache \
     ca-certificates \
     shadow \
     vim && \
+    # Set up Python virtual environment
     python3 -m venv $PYTHON_VENV && \
     $PYTHON_VENV/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    # Create Jenkins workspace directory
     mkdir -p $JENKINS_AGENT_WORKDIR && \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
-RUN usermod -aG docker jenkins
-RUN chown root:docker /var/run/docker.sock
-RUN chmod 660 /var/run/docker.sock
+# Add Jenkins user to the docker group (ensure docker group exists)
+RUN if ! getent group docker; then \
+        addgroup -S docker; \
+    fi && \
+    usermod -aG docker jenkins
 
 # Switch to Jenkins user
 USER jenkins
