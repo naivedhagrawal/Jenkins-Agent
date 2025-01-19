@@ -1,32 +1,50 @@
-# Use the official Jenkins inbound agent base image
-FROM jenkins/inbound-agent:latest
+# Use Alpine as the base image
+FROM alpine:latest
 
-# Set working directory for the Jenkins agent
-ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent
+# Set environment variables
+ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
+    AGENT_JAR_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/latest/remoting-latest.jar \
+    AGENT_JAR=/usr/share/jenkins/agent.jar
 
-# Switch to root to install Docker CLI
+# Switch to root user to install dependencies
 USER root
 
-# Install Docker CLI and other minimal tools
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    docker.io \
-    ca-certificates \
+# Install required packages
+RUN apk add --no-cache \
+    openjdk17 \
+    git \
+    bash \
     curl \
-    bash && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Ensure the 'docker' group exists and add 'jenkins' user to it
-RUN mkdir -p $JENKINS_AGENT_WORKDIR && \
+    python3 \
+    py3-pip \
+    py3-virtualenv \
+    nodejs \
+    npm \
+    make \
+    docker-io \
+    openssh-client \
+    build-base \
+    libffi-dev \
+    openssl-dev \
+    jq && \
+    # Create Jenkins user and working directory
+    adduser -D -h $JENKINS_AGENT_WORKDIR jenkins && \
+    mkdir -p $JENKINS_AGENT_WORKDIR && \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR && \
-    if ! getent group docker > /dev/null; then groupadd -g 999 docker; fi && \
-    usermod -aG docker jenkins
+    # Download Jenkins remoting agent JAR
+    curl -fsSL $AGENT_JAR_URL -o $AGENT_JAR && \
+    chmod 644 $AGENT_JAR && \
+    chown jenkins:jenkins $AGENT_JAR
 
-# Switch back to Jenkins user
+# Switch to Jenkins user
 USER jenkins
 
-# Set working directory
+# Set the working directory
 WORKDIR $JENKINS_AGENT_WORKDIR
 
-# Use the default entrypoint for Jenkins JNLP agent
-ENTRYPOINT ["jenkins-agent"]
+# Expose volume for the workspace
+VOLUME $JENKINS_AGENT_WORKDIR
+VOLUME /var/run/docker.sock
+
+# Set entrypoint for the Jenkins inbound agent
+ENTRYPOINT ["java", "-jar", "/usr/share/jenkins/agent.jar"]
