@@ -1,4 +1,4 @@
-# Use the official Docker image
+# Use the latest official Docker image
 FROM docker:latest
 
 # Set environment variables
@@ -7,7 +7,7 @@ ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
     JENKINS_SECRET=<AGENT_SECRET> \
     JENKINS_AGENT_NAME=<AGENT_NAME>
 
-# Install additional tools for Jenkins jobs
+# Install additional tools
 RUN apk add --no-cache \
     openjdk17 \
     git \
@@ -21,8 +21,8 @@ RUN apk add --no-cache \
     adduser -S jenkins -G jenkins && \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
-# Set up Docker permissions for the Jenkins user
-RUN groupadd -g 999 docker && usermod -aG docker jenkins
+# Add the Jenkins user to the existing Docker group
+RUN usermod -aG docker jenkins
 
 # Download Jenkins agent jar
 RUN curl -fsSL https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/latest/remoting-latest.jar -o /usr/share/jenkins/agent.jar && \
