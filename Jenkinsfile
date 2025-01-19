@@ -1,6 +1,8 @@
 /* groovylint-disable-next-line CompileStatic */
 pipeline {
-    agent any
+    agent {
+        kubernetes { yamlFile 'pod.yaml' }
+    }
 
     environment {
         // Jenkins secret containing Docker Hub credentials
