@@ -22,7 +22,7 @@ RUN addgroup -S jenkins && \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
 # Download Jenkins agent jar
-ADD https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/3104.1/remoting-3104.1.jar /usr/share/jenkins/agent.jar
+ADD https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/latest/remoting-latest.jar /usr/share/jenkins/agent.jar
 
 # Change ownership of the agent jar
 RUN chown jenkins:jenkins /usr/share/jenkins/agent.jar
