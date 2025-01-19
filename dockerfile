@@ -1,23 +1,50 @@
-# Use the official Jenkins agent image as the base
-FROM jenkins/inbound-agent:latest
+# Base image: Jenkins inbound agent (alpine-based)
+FROM jenkins/inbound-agent:4.13-4-alpine as jnlp
 
-# Install Docker
+# Switch to root to install dependencies
 USER root
-RUN apt-get update && \
-    apt-get install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common && \
-    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
-    apt-get update && \
-    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-# Configure Docker to run as non-root user
-RUN groupadd docker
-RUN usermod -aG docker jenkins
+# Set environment variables
+ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
+    PYTHON_VENV=/opt/venv
 
-# Install Docker Compose
-RUN curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
-    chmod +x /usr/local/bin/docker-compose
+# Update and install required tools
+RUN apk add --no-cache \
+    openjdk17 \
+    python3 \
+    py3-pip \
+    py3-virtualenv \
+    nodejs \
+    npm \
+    docker-cli \
+    bash \
+    git \
+    curl \
+    openssh \
+    ca-certificates \
+    zip \
+    unzip \
+    tar \
+    shadow \
+    build-base \
+    libffi-dev \
+    openssl-dev && \
+    python3 -m venv $PYTHON_VENV && \
+    $PYTHON_VENV/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    mkdir -p $JENKINS_AGENT_WORKDIR && \
+    chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
-# Enable DinD
-RUN mkdir -p /var/lib/docker
-VOLUME /var/lib/docker
+# Add Jenkins user to the Docker group for Docker CLI access
+RUN addgroup -S docker && usermod -aG docker jenkins
+
+# Switch back to the Jenkins user
+USER jenkins
+
+# Set working directory
+WORKDIR $JENKINS_AGENT_WORKDIR
+
+# Add Python virtual environment to PATH
+ENV PATH="$PYTHON_VENV/bin:$PATH"
+
+# Entry point for the Jenkins agent
+ENTRYPOINT ["jenkins-agent"]
