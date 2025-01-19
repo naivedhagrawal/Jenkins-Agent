@@ -12,7 +12,7 @@ ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-    openjdk-11-jdk \
+    default-jre \
     git \
     curl \
     bash \
