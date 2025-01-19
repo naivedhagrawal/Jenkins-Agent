@@ -1,49 +1,40 @@
-# Use Alpine as the base image
-FROM alpine:latest
+# Base image for lightweight agents
+FROM jenkins/inbound-agent:4.14.2-4-jdk11
+
+# Switch to root to install additional tools
+USER root
 
 # Set environment variables
 ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
-    AGENT_JAR_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/remoting/3107.1/remoting-3107.1.jar \
     AGENT_JAR=/usr/share/jenkins/agent.jar
 
-# Switch to root user to install dependencies
-USER root
-
-# Update repositories and install dependencies
-RUN apk update && apk add --no-cache \
-    openjdk17 \
-    git \
-    bash \
+# Install essential dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    docker.io \
+    git \
     python3 \
-    py3-pip \
-    py3-virtualenv \
+    python3-pip \
+    python3-venv \
     nodejs \
     npm \
-    make \
-    docker-cli \
-    openssh-client \
-    build-base \
-    libffi-dev \
-    openssl-dev \
+    unzip \
+    zip \
+    vim \
     jq && \
-    # Manually create home directory
-    mkdir -p $JENKINS_AGENT_WORKDIR && \
-    adduser -D -h $JENKINS_AGENT_WORKDIR jenkins && \
-    chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR && \
-    # Download Jenkins remoting agent JAR
-    curl -fsSL $AGENT_JAR_URL -o $AGENT_JAR && \
-    chmod 644 $AGENT_JAR && \
-    chown jenkins:jenkins $AGENT_JAR
+    # Clean up APT cache to reduce image size
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Switch to Jenkins user
-USER jenkins
+# Add Jenkins user to Docker group
+RUN groupadd -g 999 docker && \
+    usermod -aG docker jenkins && \
+    chmod 777 /var/run/docker.sock
 
-# Set the working directory
+# Set up the workspace
 WORKDIR $JENKINS_AGENT_WORKDIR
 
-# Expose volume for the workspace
-VOLUME $JENKINS_AGENT_WORKDIR
+# Switch back to Jenkins user
+USER jenkins
 
-# Set entrypoint for the Jenkins inbound agent
-ENTRYPOINT ["java", "-jar", "/usr/share/jenkins/agent.jar"]
+# Define entrypoint for the Kubernetes plugin
+ENTRYPOINT ["jenkins-agent"]
