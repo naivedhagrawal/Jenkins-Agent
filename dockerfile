@@ -55,11 +55,8 @@ RUN wget https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.
     && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet \
     && rm dotnet-install.sh
 
-# Install latest python packages
-RUN apt install python3-pip
-
 # ----------- upgrade Python Packages -----------
-RUN pip3 install --no-cache-dir --upgrade pip setuptools
+#RUN pip3 install --no-cache-dir --upgrade pip setuptools
 
 # ----------- Install Ruby Bundler -----------
 RUN gem install bundler
