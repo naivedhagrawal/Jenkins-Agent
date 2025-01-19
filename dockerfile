@@ -1,56 +1,53 @@
-# Use the official Jenkins inbound agent image as the base
+# Use the official Jenkins inbound agent base image
 FROM jenkins/inbound-agent:latest
 
-# Switch to root to install dependencies
+# Switch to root to install additional dependencies
 USER root
 
 # Set environment variables
 ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
-    DOCKER_VERSION=20.10.24
+    DEBIAN_FRONTEND=noninteractive
 
-# Update and install dependencies
-RUN yum -y update && \
-    yum -y install \
-    java-11-openjdk \
+# Update the system and install dependencies
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    openjdk-11-jdk \
     git \
     curl \
     bash \
-    openssh \
+    openssh-client \
     python3 \
     python3-pip \
     nodejs \
     npm \
     gcc \
     make \
-    libffi-devel \
-    openssl-devel \
-    zip \
+    libffi-dev \
+    libssl-dev \
+    docker.io \
     unzip \
+    zip \
     tar \
-    shadow-utils \
-    docker \
-    wget \
-    podman \
-    findutils \
+    ca-certificates \
+    software-properties-common \
+    build-essential \
     vim && \
     pip3 install --no-cache-dir --upgrade pip setuptools wheel && \
-    yum clean all
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Set up Docker CLI (if required)
-RUN curl -fsSL https://download.docker.com/linux/static/stable/$(uname -m)/docker-${DOCKER_VERSION}.tgz | tar -xz -C /usr/local/bin --strip-components=1 && \
-    chmod +x /usr/local/bin/docker
-
-# Create workspace directory
+# Create Jenkins agent workspace directory
 RUN mkdir -p $JENKINS_AGENT_WORKDIR && \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
 # Switch back to the Jenkins user
 USER jenkins
 
-# Set working directory
+# Set the working directory
 WORKDIR $JENKINS_AGENT_WORKDIR
 
-# Expose the volume for Jenkins workspace
+# Expose volume for Jenkins workspace
 VOLUME $JENKINS_AGENT_WORKDIR
 
 # Use the default entrypoint from the base image
