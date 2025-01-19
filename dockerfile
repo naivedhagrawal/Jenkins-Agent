@@ -43,6 +43,7 @@ RUN if ! getent group docker; then \
     groupadd -g 999 docker; \
     fi && \
     usermod -aG docker jenkins
+RUN export PATH=$PATH:/usr/bin
 
 # Switch to Jenkins user
 USER jenkins

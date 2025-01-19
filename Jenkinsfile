@@ -15,6 +15,7 @@ pipeline {
             steps {
                 // Checkout your repository
                 checkout scm
+                sh "docker --version"
             }
         }
 
