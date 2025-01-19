@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-24.0.5.tgz | tar xz --strip-components=1 -C /usr/local/bin
 
 # ----------- Install Latest Maven -----------
-RUN curl -fsSL https://downloads.apache.org/maven/maven-3/latest/binaries/apache-maven-3.9.5-bin.tar.gz | tar -xz -C /opt/ \
+RUN curl -fsSL https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz | tar -xz -C /opt/ \
     && ln -s /opt/apache-maven-3.9.5/bin/mvn /usr/bin/mvn
 
 # ----------- Install Latest Gradle -----------
