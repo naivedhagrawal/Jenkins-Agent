@@ -39,8 +39,10 @@ RUN apk add --no-cache \
     mkdir -p $JENKINS_AGENT_WORKDIR && \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR
 
-RUN groupadd -g 999 docker && \
-    usermod -aG docker jenkins 
+RUN if ! getent group docker; then \
+    groupadd -g 999 docker; \
+    fi && \
+    usermod -aG docker jenkins
 
 # Switch to Jenkins user
 USER jenkins
