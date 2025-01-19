@@ -16,10 +16,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Create the working directory and set appropriate permissions
+# Ensure the 'docker' group exists and add 'jenkins' user to it
 RUN mkdir -p $JENKINS_AGENT_WORKDIR && \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR && \
-    groupadd -g 999 docker && \
+    if ! getent group docker > /dev/null; then groupadd -g 999 docker; fi && \
     usermod -aG docker jenkins
 
 # Switch back to Jenkins user
