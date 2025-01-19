@@ -1,38 +1,24 @@
-# Use Jenkins inbound agent with Alpine base
-FROM jenkins/inbound-agent:latest-alpine
+# Use the official Jenkins inbound agent base image
+FROM jenkins/inbound-agent:latest
 
-# Switch to root to install additional dependencies
+# Set working directory for the Jenkins agent
+ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent
+
+# Switch to root to install Docker CLI
 USER root
 
-# Environment variables
-ENV JENKINS_AGENT_WORKDIR=/home/jenkins/agent \
-    DOCKER_VERSION=latest
-
-# Install Docker and required tools
-RUN apk add --no-cache \
-    openjdk17 \
-    docker-cli \
-    bash \
-    git \
-    curl \
-    openssh-client \
-    python3 \
-    py3-pip \
-    py3-virtualenv \
-    nodejs \
-    npm \
-    build-base \
-    libffi-dev \
-    openssl-dev \
+# Install Docker CLI and other minimal tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    docker.io \
     ca-certificates \
-    shadow \
-    jq \
-    zip \
-    unzip && \
-    # Create Jenkins agent workspace
-    mkdir -p $JENKINS_AGENT_WORKDIR && \
+    curl \
+    bash && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create the working directory and set appropriate permissions
+RUN mkdir -p $JENKINS_AGENT_WORKDIR && \
     chown -R jenkins:jenkins $JENKINS_AGENT_WORKDIR && \
-    # Add Jenkins user to the Docker group for CLI access
     groupadd -g 999 docker && \
     usermod -aG docker jenkins
 
@@ -42,5 +28,5 @@ USER jenkins
 # Set working directory
 WORKDIR $JENKINS_AGENT_WORKDIR
 
-# Use the default entrypoint from the base image
+# Use the default entrypoint for Jenkins JNLP agent
 ENTRYPOINT ["jenkins-agent"]
