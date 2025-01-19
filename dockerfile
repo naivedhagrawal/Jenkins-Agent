@@ -56,7 +56,7 @@ RUN wget https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.
     && rm dotnet-install.sh
 
 # Install latest python packages
-RUN apt install python3
+RUN apt install python3-pip
 
 # ----------- upgrade Python Packages -----------
 RUN pip3 install --no-cache-dir --upgrade pip setuptools
