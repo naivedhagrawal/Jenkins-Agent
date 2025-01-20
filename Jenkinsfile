@@ -30,24 +30,39 @@ podTemplate(
 ''') {
   node(POD_LABEL) {
         environment {
-            DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
+        DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
         }
+    stages {
         stage('Code Clone') {
-            checkout scm
+            steps {
+                checkout scm
+            }
         }
         stage('Build') {
-            container('docker') {
-                sh 'docker build -t jenkins-agent-all-in-one:latest .'
+            steps {
+                script {
+                    // Build the Docker image
+                    sh 'docker build -t jenkins-agent-all-in-one:latest .'
+                }
             }
         }
         stage('Push') {
-            container('docker') {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh 'docker login -u $USERNAME -p $PASSWORD'
-                    sh 'docker tag jenkins-agent-all-in-one:latest $DOCKERHUB_CREDENTIALS'
-                    sh 'docker push $DOCKERHUB_CREDENTIALS'
+            steps {
+                script {
+                    // Extract DockerHub credentials from Jenkins credentials store
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        // Login to Docker Hub
+                        sh 'docker login -u $USERNAME -p $PASSWORD'
+
+                        // Tag the Docker image correctly
+                        sh 'docker tag jenkins-agent-all-in-one:latest $USERNAME/$REPOSITORY:latest'
+
+                        // Push the Docker image to Docker Hub
+                        sh 'docker push $USERNAME/$REPOSITORY:latest'
+                    }
                 }
             }
         }
     }
+  }
 }
