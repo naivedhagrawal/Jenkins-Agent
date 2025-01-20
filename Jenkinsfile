@@ -2,7 +2,7 @@
 pipeline {
     agent {
         kubernetes {
-            yamlFile 'wget https://raw.githubusercontent.com/naivedhagrawal/kubernetes_pods_yaml/refs/heads/main/jnlp.yaml'
+            yamlFile 'jnlp.yaml'
         }
     }
     stages {
