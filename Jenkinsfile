@@ -12,13 +12,6 @@ pipeline {
                 }
             }
         }
-        stage('Run busybox') {
-            steps {
-                container('busybox') {
-                    sh '/bin/busybox'
-                }
-            }
-        }
         
     }
 }
