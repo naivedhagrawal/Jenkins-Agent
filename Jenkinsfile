@@ -16,6 +16,7 @@ podTemplate(
                 apt-get install -y docker.io
                 '''
                 sh 'docker --version'
+                sh 'usermod -aG docker $USER'
             }
         }
         stage('Code Clone') {
