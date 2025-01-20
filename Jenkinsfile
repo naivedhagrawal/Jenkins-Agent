@@ -11,12 +11,10 @@ podTemplate(
         }
         stage('docker installation') {
             container('jnlp') {
-                sh '''
-                apt-get update
-                apt-get install -y docker.io
-                '''
+                sh 'apt-get install -y docker.io'
                 sh 'docker --version'
                 sh 'usermod -aG docker $USER'
+                sh 'newgroup docker'
             }
         }
         stage('Code Clone') {
