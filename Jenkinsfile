@@ -1,9 +1,10 @@
 podTemplate(
-  agentContainer: 'docker',
+  agentContainer: 'jnlp',
   agentInjection: true,
   showRawYaml: false,
   containers: [
     containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true),
+    containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent', command: 'cat', ttyEnabled: true)
   ])
 
   {
@@ -16,7 +17,6 @@ podTemplate(
         }
         stage('Build') {
             container('docker') {
-                sh 'apt-get update -y && apt-get install -y openjdk-17-jdk'
                 sh 'docker build -t jenkins-agent-all-in-one:latest .'
             }
         }
