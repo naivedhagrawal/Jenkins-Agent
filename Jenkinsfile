@@ -1,17 +1,15 @@
-pipeline {
-    agent {
-        kubernetes {
-            yamlFile 'pod.yaml'
+/* groovylint-disable-next-line CompileStatic */
+podTemplate(inheritFrom: 'jnlp', containers: [
+    containerTemplate(name: 'maven', image: 'maven:latest' , ttyEnabled: true, command: 'cat'),
+  ]) {
+    node(POD_LABEL) {
+        stage('Checkout') {
+            checkout scm
         }
-    }
-    stages {
-        stage('Run maven') {
-            steps {
-                container('maven') {
-                    sh 'mvn -version'
-                }
+        stage('Build') {
+            container('maven') {
+                sh 'mvn -B -DskipTests clean package'
             }
         }
-        
     }
-}
+  }
