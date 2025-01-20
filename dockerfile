@@ -20,13 +20,16 @@ RUN apt-get update -y && \
     zip \
     python3 \
     python3-pip \
-    && apt-get clean
+    python3-venv && \
+    apt-get clean
+
+# Create a virtual environment for installing AWS CLI
+RUN python3 -m venv /venv && \
+    /venv/bin/pip install --upgrade pip && \
+    /venv/bin/pip install awscli
 
 # Install Docker (optional for Jenkins agents that need Docker to build)
 RUN curl -fsSL https://get.docker.com | sh
-
-# Install AWS CLI (optional for cloud deployments)
-RUN pip3 install awscli --upgrade
 
 # Install the latest version of Gradle (optional)
 RUN wget https://services.gradle.org/distributions/gradle-8.1.1-bin.zip -P /tmp && \
@@ -34,12 +37,12 @@ RUN wget https://services.gradle.org/distributions/gradle-8.1.1-bin.zip -P /tmp 
     ln -s /opt/gradle/gradle-8.1.1/bin/gradle /usr/bin/gradle
 
 # Set the environment variables for the tools
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV GRADLE_HOME=/opt/gradle/gradle-8.1.1
-ENV PATH=$JAVA_HOME/bin:$GRADLE_HOME/bin:$PATH
+ENV PATH=$JAVA_HOME/bin:$GRADLE_HOME/bin:/venv/bin:$PATH
 
 # Clean up unnecessary files
-RUN rm -rf /tmp/*
+RUN rm -rf /tmp/* /var/lib/apt/lists/*
 
 # Switch back to the jenkins user
 USER jenkins
