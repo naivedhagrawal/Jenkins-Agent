@@ -12,6 +12,7 @@ podTemplate(
         stage('Build') {
             container('alpine') {
                 sh 'echo "Hello, World!"'
+                sh 'apk add --no-cache curl'
             }
         }
     }
