@@ -1,10 +1,10 @@
 podTemplate(
-  agentContainer: 'docker',
+  agentContainer: 'jnlp',
   agentInjection: true,
   showRawYaml: false,
   containers: [
     containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true, alwaysPullImage: true),
-    containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:latest', command: '', alwaysPullImage: true)
+    containerTemplate(name: 'jnlp')
   ])
 
   {
