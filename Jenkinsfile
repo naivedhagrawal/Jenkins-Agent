@@ -3,7 +3,7 @@ podTemplate(
   agentInjection: true,
   showRawYaml: false,
   containers: [
-    containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true, args: '-v /var/run/docker.sock:/var/run/docker.sock'),
+    containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true, volumes: [hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')]),s
     containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent', command: 'cat', ttyEnabled: true)
   ])
 
