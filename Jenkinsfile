@@ -12,6 +12,7 @@ podTemplate(
         }
         stage('docker installation') {
             container('alpine') {
+                sh apk search openjdk
                 sh '''
               echo "http://mirror1.hs-esslingen.de/pub/Mirrors/alpine/v3.21/main" > /etc/apk/repositories
               echo "http://mirror1.hs-esslingen.de/pub/Mirrors/alpine/v3.21/community" >> /etc/apk/repositories
