@@ -13,6 +13,8 @@ podTemplate(
             container('alpine') {
                 sh 'echo "Hello, World!"'
                 sh 'apk add --no-cache curl'
+                sh 'apk add docker'
+                sh 'docker --version'
             }
         }
     }
