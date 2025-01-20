@@ -1,10 +1,21 @@
 podTemplate(
-  agentContainer: 'jnlp',
+  agentContainer: 'docker',
   agentInjection: true,
   showRawYaml: false,
   containers: [
-    containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true, volumes: [hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')]),
-    containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent', command: 'cat', ttyEnabled: true)
+    containerTemplate(
+        name: 'docker',
+        image: 'docker:latest',
+        command: 'cat',
+        ttyEnabled: true,
+        volumes: [
+            hostPathVolume(
+                mountPath: '/var/run/docker.sock',
+                hostPath: '/var/run/docker.sock'
+            )
+        ]
+    ),
+    containerTemplate(name: 'jnlp')
   ])
 
   {
@@ -22,7 +33,13 @@ podTemplate(
         }
         stage('Push') {
             container('docker') {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'docker-hub-credentials', 
+                        usernameVariable: 'USERNAME', 
+                        passwordVariable: 'PASSWORD'
+                    )
+                ]) {
                     sh 'docker login -u $USERNAME -p $PASSWORD'
                     sh 'docker tag jenkins-agent-all-in-one:latest $DOCKERHUB_CREDENTIALS'
                     sh 'docker push $DOCKERHUB_CREDENTIALS'
