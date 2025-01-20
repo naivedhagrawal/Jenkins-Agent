@@ -36,6 +36,8 @@ RUN apt-get update && \
     apt-get install -y wget unzip && \
     apt-get clean
 
+RUN usermod -aG docker jenkins
+
 # Install the latest version of Gradle (optional)
 RUN wget https://services.gradle.org/distributions/gradle-8.1.1-bin.zip -P /tmp && \
     unzip -d /opt/gradle /tmp/gradle-8.1.1-bin.zip && \
