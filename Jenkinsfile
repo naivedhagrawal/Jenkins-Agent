@@ -15,7 +15,7 @@ podTemplate(yaml: '''
                   emptyDir: {}
                 containers:
                 - name: docker
-                  image: docker:19.03.1
+                  image: docker:latest
                   readinessProbe:
                     exec:
                       command: [sh, -c, "ls -S /var/run/docker.sock"]
@@ -27,7 +27,7 @@ podTemplate(yaml: '''
                   - name: docker-socket
                     mountPath: /var/run
                 - name: docker-daemon
-                  image: docker:19.03.1-dind
+                  image: docker:dind
                   securityContext:
                     privileged: true
                   volumeMounts:
