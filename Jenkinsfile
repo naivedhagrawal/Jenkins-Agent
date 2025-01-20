@@ -1,8 +1,11 @@
 /* groovylint-disable-next-line CompileStatic */
-podTemplate(inheritFrom: 'jnlp', containers: [
-    containerTemplate(name: 'maven', image: 'maven:latest' , ttyEnabled: true, command: 'cat', alwaysPullImage: true,)])
+podTemplate(inheritFrom: 'jnlp',
+    containers: [
+    containerTemplate(name: 'maven', image: 'maven:latest' , ttyEnabled: true, command: 'cat', alwaysPullImage: true,)
+    ]
     environment {
         KUBERNETES_QUIET = 'true' }
+)
 {
     node(maven) {
         stage('Checkout') {
@@ -15,4 +18,4 @@ podTemplate(inheritFrom: 'jnlp', containers: [
         }
     }
 }
- 
+
