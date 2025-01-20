@@ -11,15 +11,11 @@ spec:
     - cat
     tty: true
   - name: docker
-    image: docker:dind
+    image: docker:latest
     securityContext:
       privileged: true
-    env:
-    - name: DOCKER_TLS_CERTDIR
-      value: ""
     command:
     - dockerd-entrypoint.sh
     args:
-    - --host=tcp://0.0.0.0:2375
     - --host=unix:///var/run/docker.sock
     tty: true
