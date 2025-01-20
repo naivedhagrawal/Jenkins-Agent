@@ -1,14 +1,25 @@
+apiVersion: v1
+kind: Pod
 metadata:
   labels:
     agent: docker
 spec:
   containers:
   - name: jnlp
-  - name: docker
-    image: docker:dind    
+    image: jenkins/inbound-agent
     command:
-    - 'cat'
+    - cat
     tty: true
+  - name: docker
+    image: docker:dind
+    securityContext:
+      privileged: true
     env:
-    - name: CONTAINER_ENV_VAR
-      value: docker
+    - name: DOCKER_TLS_CERTDIR
+      value: ""
+    command:
+    - dockerd-entrypoint.sh
+    args:
+    - --host=tcp://0.0.0.0:2375
+    - --host=unix:///var/run/docker.sock
+    tty: true
