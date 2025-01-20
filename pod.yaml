@@ -1,12 +1,14 @@
 metadata:
   labels:
-    app: jnlp
+    agent: docker
 spec:
   containers:
   - name: jnlp
-
-  - name: maven
-    image: maven
+  - name: docker
+    image: docker:latest    
     command:
-    - cat
+    - sleep
     tty: true
+    env:
+    - name: CONTAINER_ENV_VAR
+      value: docker
