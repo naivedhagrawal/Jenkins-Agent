@@ -6,6 +6,7 @@ spec:
   - name: jnlp
 
   - name: maven
-    image: maven:latest
+    image: maven
     command:
     - cat
+    tty: true
