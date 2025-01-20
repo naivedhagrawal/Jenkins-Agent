@@ -1,6 +1,6 @@
 /* groovylint-disable-next-line CompileStatic */
 pipeline {
-    agent any
+    agent { kubernetes { label 'default' } }
     stages {
         stage('Build') {
             agent { kubernetes { label 'maven' } }
