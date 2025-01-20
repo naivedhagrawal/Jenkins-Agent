@@ -28,41 +28,28 @@ podTemplate(
                   - name: docker-socket
                     mountPath: /var/run
 ''') {
-  node(POD_LABEL) {
+    /* groovylint-disable-next-line Indentation */
+    node(POD_LABEL) {
         environment {
-        DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
+            DOCKERHUB_CREDENTIALS = credentials('docker_hub_up')
         }
-    stages {
         stage('Code Clone') {
-            steps {
-                checkout scm
-            }
+            checkout scm
         }
         stage('Build') {
-            steps {
-                script {
-                    // Build the Docker image
-                    sh 'docker build -t jenkins-agent-all-in-one:latest .'
-                }
+            container('docker') {
+                sh 'docker build -t jenkins-agent-all-in-one:latest .'
             }
         }
         stage('Push') {
-            steps {
-                script {
-                    // Extract DockerHub credentials from Jenkins credentials store
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        // Login to Docker Hub
-                        sh 'docker login -u $USERNAME -p $PASSWORD'
-
-                        // Tag the Docker image correctly
-                        sh 'docker tag jenkins-agent-all-in-one:latest $USERNAME/$REPOSITORY:latest'
-
-                        // Push the Docker image to Docker Hub
-                        sh 'docker push $USERNAME/$REPOSITORY:latest'
-                    }
+            container('docker') {
+                /* groovylint-disable-next-line LineLength */
+                withCredentials([usernamePassword(credentialsId: 'docker_hub_up', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh 'docker login -u $USERNAME -p $PASSWORD'
+                    sh 'docker tag jenkins-agent-all-in-one:latest $DOCKERHUB_CREDENTIALS'
+                    sh 'docker push $DOCKERHUB_CREDENTIALS'
                 }
             }
         }
     }
-  }
 }
