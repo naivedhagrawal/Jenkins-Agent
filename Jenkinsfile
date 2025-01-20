@@ -3,7 +3,7 @@ podTemplate(
   agentInjection: true,
   containers: [
     containerTemplate(name: 'maven', image: 'maven:latest', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'golang', image: 'golang:latest', command: 'sleep', args: '99d' ttyEnabled: true)
+    containerTemplate(name: 'golang', image: 'golang:latest', command: 'sleep', args: '99d', ttyEnabled: true)
   ]) {
 
     node(POD_LABEL) {
@@ -30,4 +30,4 @@ podTemplate(
         }
 
     }
-}
+  }
