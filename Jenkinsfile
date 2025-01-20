@@ -1,5 +1,8 @@
 podTemplate(inheritFrom: 'jnlp', containers: [
-    containerTemplate(name: 'maven', image: 'maven:latest' , ttyEnabled: true, command: 'cat', alwaysPullImage: true,)])
+    containerTemplate(name: 'maven', image: 'maven:latest' , ttyEnabled: true, command: 'cat', alwaysPullImage: true,)
+    ]
+    environment {
+        KUBERNETES_QUIET = 'true'})
 {
     node(POD_LABEL) {
         stage('Checkout') {
