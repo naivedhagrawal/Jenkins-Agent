@@ -3,7 +3,7 @@ podTemplate(
   agentInjection: true,
   showRawYaml: false,
   containers: [
-    containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true, volumes: [hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')]),
+    containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true, alwaysPullImage: true),
     containerTemplate(name: 'jnlp')
   ])
 
