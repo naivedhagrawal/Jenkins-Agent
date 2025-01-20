@@ -1,11 +1,7 @@
-/* groovylint-disable-next-line CompileStatic */
-podTemplate(inheritFrom: 'jnlp',
-    containers: [
-    containerTemplate(name: 'maven', image: 'maven:latest' , ttyEnabled: true, command: 'cat', alwaysPullImage: true,)
-    ]
-)
+podTemplate(inheritFrom: 'jnlp', containers: [
+    containerTemplate(name: 'maven', image: 'maven:latest' , ttyEnabled: true, command: 'cat', alwaysPullImage: true,)])
 {
-    node(maven) {
+    node(POD_LABEL) {
         stage('Checkout') {
             checkout scm
         }
