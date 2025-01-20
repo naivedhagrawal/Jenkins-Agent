@@ -1,4 +1,6 @@
-podTemplate(yaml: '''
+podTemplate(
+    showRawYaml: false,
+    yaml: '''
               apiVersion: v1
               kind: Pod
               spec:
