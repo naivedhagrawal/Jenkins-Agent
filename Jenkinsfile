@@ -3,8 +3,8 @@ podTemplate(
   agentInjection: true,
   showRawYaml: false,
   containers: [
-    containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true, alwaysPullImage: true),
-    containerTemplate(name: 'jnlp')
+    containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true),
+    containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent', command: 'cat', ttyEnabled: true)
   ])
 
   {
@@ -17,6 +17,7 @@ podTemplate(
         }
         stage('Build') {
             container('docker') {
+
                 sh 'docker build -t jenkins-agent-all-in-one:latest .'
             }
         }
