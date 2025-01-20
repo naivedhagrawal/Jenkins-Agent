@@ -8,15 +8,15 @@ podTemplate(
   ]) {
     node(POD_LABEL) {
         environment {
-            DOCKERHUB_CREDENTIALS = credentials(docker - hub - credentials)
+            DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
         }
         stage('docker installation') {
             container('alpine') {
                 sh '''
-              echo "http://mirror1.hs-esslingen.de/pub/Mirrors/alpine/v3.21/main" > /etc/apk/repositories
-              echo "http://mirror1.hs-esslingen.de/pub/Mirrors/alpine/v3.21/community" >> /etc/apk/repositories
-              apk update && apk add --no-cache docker-cli
-              '''
+                echo "http://mirror1.hs-esslingen.de/pub/Mirrors/alpine/v3.21/main" > /etc/apk/repositories
+                echo "http://mirror1.hs-esslingen.de/pub/Mirrors/alpine/v3.21/community" >> /etc/apk/repositories
+                apk update && apk add --no-cache openjdk11 docker-cli
+                '''
                 sh 'docker --version'
             }
         }
@@ -39,3 +39,4 @@ podTemplate(
         }
     }
   }
+}
