@@ -4,8 +4,8 @@ podTemplate(
   containers: [
     containerTemplate(name: 'maven', image: 'maven:latest', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'golang', image: 'golang:latest', command: 'sleep', args: '99d', ttyEnabled: true)
-  ]) {
-
+    ]
+  ) {
     node(POD_LABEL) {
         environment {
             KUBERNETES_QUIET = 'true'  // Suppress Kubernetes plugin output
@@ -18,21 +18,19 @@ podTemplate(
                     sh 'mvn -B -ntp clean install'
                 }
             }
-        }
 
-        stage('Get a Golang project') {
-            git url: 'https://github.com/hashicorp/terraform.git', branch: 'main'
-            container('golang') {
-                stage('Build a Go project') {
-                    sh '''
+            stage('Get a Golang project') {
+                git url: 'https://github.com/hashicorp/terraform.git', branch: 'main'
+                container('golang') {
+                    stage('Build a Go project') {
+                        sh '''
                     mkdir -p /go/src/github.com/hashicorp
                     ln -s `pwd` /go/src/github.com/hashicorp/terraform
                     cd /go/src/github.com/hashicorp/terraform && make
                     '''
+                    }
                 }
             }
         }
-
     }
   }
-}
