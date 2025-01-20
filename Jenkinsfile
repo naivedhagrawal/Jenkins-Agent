@@ -3,7 +3,7 @@ podTemplate(
   agentInjection: true,
   showRawYaml: false,
   containers: [
-    containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent', command: 'cat', ttyEnabled: true),
+    containerTemplate(name: 'jnlp', image: 'jenkins/inbound-agent', command: 'cat', ttyEnabled: true, runAsUser: '0'),
   ]) {
     node(POD_LABEL) {
         environment {
@@ -11,7 +11,10 @@ podTemplate(
         }
         stage('docker installation') {
             container('jnlp') {
-                sh 'apt-get update'
+                sh '''
+                apt-get update
+                apt-get install -y docker.io
+                '''
                 sh 'docker --version'
             }
         }
@@ -34,3 +37,4 @@ podTemplate(
         }
     }
   }
+}
