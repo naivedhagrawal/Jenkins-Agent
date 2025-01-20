@@ -16,6 +16,4 @@ spec:
       privileged: true
     command:
     - cat
-    args:
-    - --host=unix:///var/run/docker.sock
     tty: true
