@@ -38,11 +38,6 @@ RUN apt-get update && \
 
 RUN usermod -aG docker jenkins
 
-# Install the latest version of Gradle (optional)
-RUN wget https://services.gradle.org/distributions/gradle-8.1.1-bin.zip -P /tmp && \
-    unzip -d /opt/gradle /tmp/gradle-8.1.1-bin.zip && \
-    ln -s /opt/gradle/gradle-8.1.1/bin/gradle /usr/bin/gradle
-
 # Set the environment variables for the tools
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV GRADLE_HOME=/opt/gradle/gradle-8.1.1
