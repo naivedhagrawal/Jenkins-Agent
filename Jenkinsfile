@@ -16,6 +16,7 @@ podTemplate(
         }
         stage('Build') {
             container('docker') {
+                sh 'apt-get update -y && apt-get install -y openjdk-17-jdk'
                 sh 'docker build -t jenkins-agent-all-in-one:latest .'
             }
         }
