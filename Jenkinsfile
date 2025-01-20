@@ -1,16 +1,13 @@
 podTemplate(
   agentContainer: 'maven',
   agentInjection: true,
+  showRawYaml: false,
   containers: [
     containerTemplate(name: 'maven', image: 'maven:latest', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'golang', image: 'golang:latest', command: 'sleep', args: '99d', ttyEnabled: true)
   ])
 
   {
-    environment {
-        KUBERNETES_QUIET = 'true'  // Suppress Kubernetes plugin output
-    }
-
     node(POD_LABEL) {
         stage('Get a Maven project') {
             git 'https://github.com/jenkinsci/kubernetes-plugin.git'
