@@ -4,7 +4,7 @@ podTemplate(inheritFrom: 'jnlp', containers: [
     environment {
         KUBERNETES_QUIET = 'true' }
 {
-    node(POD_LABEL) {
+    node(maven) {
         stage('Checkout') {
             checkout scm
         }
