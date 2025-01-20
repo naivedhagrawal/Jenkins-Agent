@@ -7,7 +7,7 @@ spec:
   - name: docker
     image: docker:dind    
     command:
-    - sleep
+    - 'cat'
     tty: true
     env:
     - name: CONTAINER_ENV_VAR
