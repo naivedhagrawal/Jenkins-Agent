@@ -8,8 +8,18 @@ podTemplate(
             image: 'jenkins/inbound-agent', 
             command: 'cat', 
             ttyEnabled: true, 
-            runAsUser: '0'
+            runAsUser: '0',
+            volumeMounts: [
+                // Mounting Docker socket to access the host's Docker daemon
+                mountPath: '/var/run/docker.sock', 
+                name: 'docker-socket',
+                readOnly: true
+            ]
         ),
+    ],
+    volumes: [
+        // Defining the volume for Docker socket
+        volume(name: 'docker-socket', hostPath: '/var/run/docker.sock')
     ]
 ) {
     node(POD_LABEL) {
@@ -25,7 +35,6 @@ podTemplate(
             }
         }
         stage('Code Clone') {
-            // Cloning the code from SCM
             checkout scm
         }
         stage('Build') {
