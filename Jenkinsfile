@@ -1,29 +1,32 @@
 podTemplate(
-  agentContainer: 'maven',
+  agentContainer: 'docker',
   agentInjection: true,
   showRawYaml: false,
   containers: [
-    containerTemplate(name: 'maven', image: 'maven:latest', command: 'cat', ttyEnabled: true),
-    containerTemplate(name: 'golang', image: 'golang:latest', command: 'sleep', args: '99d', ttyEnabled: true)
+    containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true),
   ])
 
   {
     node(POD_LABEL) {
-        stage('Get a Maven project') {
-            git 'https://github.com/jenkinsci/kubernetes-plugin.git'
-            container('maven') {
-                stage('Build a Maven project') {
-                    sh 'mvn --version'
+        environment {
+            DOCKERHUB_CREDENTIALS = credentials(docker-hub-credentials)
+        }
+        stage('Code Clone') {
+            checkout scm
+        }
+        stage('Build') {
+            container('docker') {
+                sh 'docker build -t jenkins-agent-all-in-one:latest .'
+            }
+        }
+        stage('Push') {
+            container('docker') {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh 'docker login -u $USERNAME -p $PASSWORD'
+                    sh 'docker tag jenkins-agent-all-in-one:latest $DOCKERHUB_CREDENTIALS'
+                    sh 'docker push $DOCKERHUB_CREDENTIALS'
                 }
             }
         }
     }
-        stage('Get a Golang project') {
-            git url: 'https://github.com/hashicorp/terraform.git', branch: 'main'
-            container('golang') {
-                stage('Build a Go project') {
-                    sh 'go version'
-                }
-            }
-        }
     }
