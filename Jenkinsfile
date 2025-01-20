@@ -8,7 +8,7 @@ podTemplate(
             image: 'jenkins/inbound-agent', 
             command: 'cat', 
             ttyEnabled: true, 
-            runAsUser: '0's
+            runAsUser: '0'
         ),
     ]
 ) {
