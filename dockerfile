@@ -31,6 +31,11 @@ RUN python3 -m venv /venv && \
 # Install Docker (optional for Jenkins agents that need Docker to build)
 RUN curl -fsSL https://get.docker.com | sh
 
+# Ensure wget and unzip are installed for Gradle download
+RUN apt-get update && \
+    apt-get install -y wget unzip && \
+    apt-get clean
+
 # Install the latest version of Gradle (optional)
 RUN wget https://services.gradle.org/distributions/gradle-8.1.1-bin.zip -P /tmp && \
     unzip -d /opt/gradle /tmp/gradle-8.1.1-bin.zip && \
