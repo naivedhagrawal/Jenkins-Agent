@@ -4,7 +4,7 @@ podTemplate(
   showRawYaml: false,
   containers: [
     containerTemplate(name: 'docker', image: 'docker:latest', command: 'cat', ttyEnabled: true, alwaysPullImage: true),
-    containerTemplate(name: 'jnlp')
+    containerTemplate(name: 'jnlp', image: 'jenkins/jnlp-slave:latest', command: '', alwaysPullImage: true)
   ])
 
   {
