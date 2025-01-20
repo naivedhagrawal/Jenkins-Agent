@@ -2,7 +2,8 @@
 pipeline {
     agent {
         kubernetes {
-            yamlFile 'https://github.com/naivedhagrawal/kubernetes_pods_yaml/blob/main/jnlp.yaml'
+            /* groovylint-disable-next-line LineLength */
+            yamlFile 'https://github.com/naivedhagrawal/kubernetes_pods_yaml/blob/30b8cc55a972f45b6294fbf3d6ad7a7f880f22af/jnlp.yaml'
         }
     }
     stages {
