@@ -14,8 +14,6 @@ podTemplate(
                 sh 'apt-get update'
                 sh 'apt-get install -y docker.io'
                 sh 'docker --version'
-                sh 'sudo usermod -aG docker $USER'
-                sh 'sudo newgrp docker'
             }
         }
         stage('Code Clone') {
@@ -23,15 +21,15 @@ podTemplate(
         }
         stage('Build') {
             container('jnlp') {
-                sh 'sudo docker build -t jenkins-agent-all-in-one:latest .'
+                sh 'docker build -t jenkins-agent-all-in-one:latest .'
             }
         }
         stage('Push') {
             container('jnlp') {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh 'sudo docker login -u $USERNAME -p $PASSWORD'
-                    sh 'sudo docker tag jenkins-agent-all-in-one:latest $DOCKERHUB_CREDENTIALS'
-                    sh 'sudo docker push $DOCKERHUB_CREDENTIALS'
+                    sh 'docker login -u $USERNAME -p $PASSWORD'
+                    sh 'docker tag jenkins-agent-all-in-one:latest $DOCKERHUB_CREDENTIALS'
+                    sh 'docker push $DOCKERHUB_CREDENTIALS'
                 }
             }
         }
