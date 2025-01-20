@@ -8,7 +8,7 @@ USER root
 RUN apt-get update -y && \
     apt-get upgrade -y && \
     apt-get install -y \
-    openjdk-11-jdk \
+    openjdk-17-jdk \
     git \
     maven \
     gradle \
