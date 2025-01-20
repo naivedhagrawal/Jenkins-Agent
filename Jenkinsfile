@@ -46,8 +46,8 @@ podTemplate(
                 /* groovylint-disable-next-line LineLength */
                 withCredentials([usernamePassword(credentialsId: 'docker_hub_up', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh 'docker login -u $USERNAME -p $PASSWORD'
-                    sh 'docker tag jenkins-agent-all-in-one:latest $DOCKERHUB_CREDENTIALS'
-                    sh 'docker push $DOCKERHUB_CREDENTIALS'
+                    sh 'docker tag jenkins-agent-all-in-one:latest #USERNAME/jenkins-agent-all-in-one:latest'
+                    sh 'docker push $USERNAME/jenkins-agent-all-in-one:latest'
                 }
             }
         }
