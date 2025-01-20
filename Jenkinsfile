@@ -6,16 +6,16 @@ podTemplate(
     containerTemplate(name: 'golang', image: 'golang:latest', command: 'sleep', args: '99d', ttyEnabled: true)
   ]) {
 
-    environment {
-        KUBERNETES_QUIET = 'true'  // Suppress Kubernetes plugin output
-    }
-
     node(POD_LABEL) {
         stage('Get a Maven project') {
             git 'https://github.com/jenkinsci/kubernetes-plugin.git'
             container('maven') {
                 stage('Build a Maven project') {
-                    sh 'mvn -B -ntp clean install'
+                    // Redirect stdout and stderr to a file to suppress console logs
+                    sh '''
+                    mvn -B -ntp clean install > build_logs.txt 2>&1
+                    '''
+                    echo "Maven build complete. Logs are saved in build_logs.txt"
                 }
             }
         }
@@ -27,8 +27,9 @@ podTemplate(
                     sh '''
                     mkdir -p /go/src/github.com/hashicorp
                     ln -s `pwd` /go/src/github.com/hashicorp/terraform
-                    cd /go/src/github.com/hashicorp/terraform && make
+                    cd /go/src/github.com/hashicorp/terraform && make > build_logs.txt 2>&1
                     '''
+                    echo "Go project build complete. Logs are saved in build_logs.txt"
                 }
             }
         }
