@@ -1,59 +1,166 @@
-podTemplate(
-    agentContainer: 'jnlp',
-    agentInjection: true,
-    showRawYaml: false,
-    containers: [
-        containerTemplate(
-            name: 'jnlp', 
-            image: 'jenkins/inbound-agent', 
-            command: 'cat', 
-            ttyEnabled: true, 
-            runAsUser: '0',
-            volumeMounts: [
-                // Mounting Docker socket to access the host's Docker daemon
-                mountPath: '/var/run/docker.sock', 
-                name: 'docker-socket',
-                readOnly: true
-            ]
-        ),
-    ],
-    volumes: [
-        // Defining the volume for Docker socket
-        volume(name: 'docker-socket', hostPath: '/var/run/docker.sock')
-    ]
-) {
-    node(POD_LABEL) {
-        environment {
-            DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
-        }
+pipeline {
+    agent none  // Specify that the pipeline will run on a Kubernetes agent
+
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
+    }
+
+    stages {
         stage('docker installation') {
-            container('jnlp') {
-                // Installing Docker inside the container
-                sh 'apt-get update'
-                sh 'apt-get install -y docker.io'
-                sh 'docker --version'
+            agent {
+                kubernetes {
+                    label 'docker-agent'  // Define a label for this pod template
+                    defaultContainer 'jnlp'  // Default container to use (jnlp)
+                    yaml '''
+                    apiVersion: v1
+                    kind: Pod
+                    metadata:
+                      name: jenkins-agent
+                    spec:
+                      containers:
+                        - name: jnlp
+                          image: 'jenkins/inbound-agent'
+                          command: ['cat']
+                          tty: true
+                          securityContext:
+                            runAsUser: 0
+                          volumeMounts:
+                            - mountPath: /var/run/docker.sock
+                              name: docker-socket
+                              readOnly: true
+                      volumes:
+                        - name: docker-socket
+                          hostPath:
+                            path: /var/run/docker.sock
+                            type: Socket
+                    '''
+                }
+            }
+            steps {
+                container('jnlp') {
+                    // Install Docker inside the container
+                    sh 'apt-get update'
+                    sh 'apt-get install -y docker.io'
+                    sh 'docker --version'
+                }
             }
         }
+
         stage('Code Clone') {
-            checkout scm
-        }
-        stage('Build') {
-            container('jnlp') {
-                // Building Docker image
-                sh 'docker build -t jenkins-agent-all-in-one:latest .'
+            agent {
+                kubernetes {
+                    label 'docker-agent'
+                    defaultContainer 'jnlp'
+                    yaml '''
+                    apiVersion: v1
+                    kind: Pod
+                    metadata:
+                      name: jenkins-agent
+                    spec:
+                      containers:
+                        - name: jnlp
+                          image: 'jenkins/inbound-agent'
+                          command: ['cat']
+                          tty: true
+                          securityContext:
+                            runAsUser: 0
+                          volumeMounts:
+                            - mountPath: /var/run/docker.sock
+                              name: docker-socket
+                              readOnly: true
+                      volumes:
+                        - name: docker-socket
+                          hostPath:
+                            path: /var/run/docker.sock
+                            type: Socket
+                    '''
+                }
+            }
+            steps {
+                checkout scm
             }
         }
+
+        stage('Build') {
+            agent {
+                kubernetes {
+                    label 'docker-agent'
+                    defaultContainer 'jnlp'
+                    yaml '''
+                    apiVersion: v1
+                    kind: Pod
+                    metadata:
+                      name: jenkins-agent
+                    spec:
+                      containers:
+                        - name: jnlp
+                          image: 'jenkins/inbound-agent'
+                          command: ['cat']
+                          tty: true
+                          securityContext:
+                            runAsUser: 0
+                          volumeMounts:
+                            - mountPath: /var/run/docker.sock
+                              name: docker-socket
+                              readOnly: true
+                      volumes:
+                        - name: docker-socket
+                          hostPath:
+                            path: /var/run/docker.sock
+                            type: Socket
+                    '''
+                }
+            }
+            steps {
+                container('jnlp') {
+                    // Build Docker image
+                    sh 'docker build -t jenkins-agent-all-in-one:latest .'
+                }
+            }
+        }
+
         stage('Push') {
-            container('jnlp') {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    // Logging in to Docker Hub
-                    sh 'docker login -u $USERNAME -p $PASSWORD'
-                    
-                    // Tagging the image with Docker Hub repository
-                    sh 'docker tag jenkins-agent-all-in-one:latest $USERNAME/jenkins-agent-all-in-one:latest'
-                    
-                    // Pushing the Docker image to Docker Hub
-                    sh 'docker push $USERNAME/jenkins-agent-all-in-one:latest'
+            agent {
+                kubernetes {
+                    label 'docker-agent'
+                    defaultContainer 'jnlp'
+                    yaml '''
+                    apiVersion: v1
+                    kind: Pod
+                    metadata:
+                      name: jenkins-agent
+                    spec:
+                      containers:
+                        - name: jnlp
+                          image: 'jenkins/inbound-agent'
+                          command: ['cat']
+                          tty: true
+                          securityContext:
+                            runAsUser: 0
+                          volumeMounts:
+                            - mountPath: /var/run/docker.sock
+                              name: docker-socket
+                              readOnly: true
+                      volumes:
+                        - name: docker-socket
+                          hostPath:
+                            path: /var/run/docker.sock
+                            type: Socket
+                    '''
+                }
+            }
+            steps {
+                container('jnlp') {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        // Log into Docker Hub
+                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        
+                        // Tag the Docker image
+                        sh 'docker tag jenkins-agent-all-in-one:latest $USERNAME/jenkins-agent-all-in-one:latest'
+                        
+                        // Push Docker image to Docker Hub
+                        sh 'docker push $USERNAME/jenkins-agent-all-in-one:latest'
+                    }
                 }
             }
         }
