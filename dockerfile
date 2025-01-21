@@ -4,31 +4,42 @@ FROM jenkins/inbound-agent:alpine
 # Switch to root user to install dependencies
 USER root
 
-# Install essential build tools and Docker
+# Update the package index and install necessary tools one step at a time
 RUN apk update && \
     apk add --no-cache \
-    openjdk11 \
+    bash \
+    curl \
+    wget \
+    unzip \
+    python3 \
+    py3-pip && \
+    echo "Basic tools installed successfully" 
+
+# Install Java (openjdk11)
+RUN apk add --no-cache openjdk11 && \
+    echo "Java installed successfully"
+
+# Install development tools and other dependencies
+RUN apk add --no-cache \
     git \
     maven \
     nodejs \
-    npm \
-    curl \
-    unzip \
-    python3 \
-    py3-pip \
-    bash \
-    wget && \
-    apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev && \
+    npm && \
+    echo "Development tools installed successfully"
+
+# Install AWS CLI and remove build dependencies
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev && \
     python3 -m ensurepip && \
     pip3 install --upgrade pip && \
     pip3 install awscli && \
     apk del .build-deps && \
-    rm -rf /var/cache/apk/*
+    echo "AWS CLI installed and build dependencies removed"
 
-# Install Docker using the get-docker.sh script (ensure latest Docker version)
+# Install Docker using get-docker.sh script
 RUN curl -fsSL https://get.docker.com -o get-docker.sh && \
     sh get-docker.sh && \
-    rm get-docker.sh
+    rm get-docker.sh && \
+    echo "Docker installed successfully"
 
 # Add Jenkins user to Docker group
 RUN addgroup -S jenkins && \
