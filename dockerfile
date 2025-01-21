@@ -4,7 +4,7 @@ FROM jenkins/inbound-agent:alpine
 # Switch to root user to install dependencies
 USER root
 
-# Install essential build tools
+# Install essential build tools and Docker
 RUN apk update && \
     apk add --no-cache \
     openjdk11 \
@@ -18,19 +18,19 @@ RUN apk update && \
     py3-pip \
     bash \
     wget && \
+    apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev && \
     python3 -m ensurepip && \
     pip3 install --upgrade pip && \
-    apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev && \
     pip3 install awscli && \
     apk del .build-deps && \
     rm -rf /var/cache/apk/*
 
-# Install Docker using the get-docker.sh script (this ensures the latest Docker version)
+# Install Docker using the get-docker.sh script (ensure latest Docker version)
 RUN curl -fsSL https://get.docker.com -o get-docker.sh && \
     sh get-docker.sh && \
     rm get-docker.sh
 
-# Add Jenkins user to the Docker group
+# Add Jenkins user to Docker group
 RUN addgroup -S jenkins && \
     adduser -S -G jenkins jenkins && \
     addgroup jenkins docker
