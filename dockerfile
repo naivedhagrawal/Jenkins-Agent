@@ -16,6 +16,7 @@ RUN apt-get update -y && \
     npm \
     curl \
     unzip \
+    make \
     vim \
     zip \
     python3 \
