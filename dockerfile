@@ -7,28 +7,25 @@ USER root
 # Update and install essential build tools in one step
 RUN apt-get update -y && \
     apt-get install -y \
-    openjdk-17-jdk \
-    git \
-    maven \
-    gradle \
-    nodejs \
-    npm \
-    curl \
-    unzip \
+    #openjdk-17-jdk \
+    #git \
+    #maven \
+    #gradle \
+    #nodejs \
+    #npm \
+    #curl \
+    #unzip \
     make \
-    vim \
-    zip \
-    python3 \
-    python3-pip \
-    python3-venv \
-    wget && \
+    #python3 \
+    #python3-pip \
+    #python3-venv \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/*
 
 # Install AWS CLI in a Python virtual environment
-RUN python3 -m venv /venv && \
-    /venv/bin/pip install --upgrade pip && \
-    /venv/bin/pip install awscli
+#RUN python3 -m venv /venv && \
+ #   /venv/bin/pip install --upgrade pip && \
+  # /venv/bin/pip install awscli
 
 # Install Docker (use the official Docker install script for a more secure install)
 RUN curl -fsSL https://get.docker.com -o get-docker.sh && \
