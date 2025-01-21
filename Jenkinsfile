@@ -13,6 +13,8 @@ podTemplate(
                   readinessProbe:
                     exec:
                       command: [sh, -c, "ls -S /var/run/docker.sock"]
+                    initialDelaySeconds: 5
+                    periodSeconds: 5
                   command:
                   - sleep
                   args:
@@ -24,6 +26,7 @@ podTemplate(
                   image: docker:dind
                   securityContext:
                     privileged: true
+                  command: ["dockerd"]
                   volumeMounts:
                   - name: docker-socket
                     mountPath: /var/run
