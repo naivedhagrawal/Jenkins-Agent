@@ -42,6 +42,7 @@ podTemplate(
         stage('Build') {
             container('docker') {
                 sh 'docker build -t jenkins-agent-all-in-one:latest .'
+                sh 'docker images'
             }
         }
         stage('Push') {
