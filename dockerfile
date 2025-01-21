@@ -4,10 +4,10 @@ FROM jenkins/inbound-agent:alpine
 # Switch to root user to install dependencies
 USER root
 
-# Install essential build tools and Docker
+# Install essential build tools
 RUN apk update && \
     apk add --no-cache \
-    openjdk17 \
+    openjdk11 \
     git \
     maven \
     nodejs \
@@ -17,8 +17,7 @@ RUN apk update && \
     python3 \
     py3-pip \
     bash \
-    wget \
-    docker && \
+    wget && \
     python3 -m ensurepip && \
     pip3 install --upgrade pip && \
     apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev && \
@@ -26,21 +25,21 @@ RUN apk update && \
     apk del .build-deps && \
     rm -rf /var/cache/apk/*
 
-# Install Docker using the Alpine package manager (optional if you need Docker inside the agent)
+# Install Docker using the get-docker.sh script (this ensures the latest Docker version)
 RUN curl -fsSL https://get.docker.com -o get-docker.sh && \
     sh get-docker.sh && \
     rm get-docker.sh
 
-# Add Jenkins user to the Docker group to allow Docker execution
+# Add Jenkins user to the Docker group
 RUN addgroup -S jenkins && \
     adduser -S -G jenkins jenkins && \
     addgroup jenkins docker
 
 # Set environment variables for Java and Python tools
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk
 ENV PATH=$JAVA_HOME/bin:/venv/bin:$PATH
 
-# Expose the Jenkins agent port (default for Jenkins agents)
+# Expose Jenkins agent port
 EXPOSE 50000
 
 # Switch back to the Jenkins user
