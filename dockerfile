@@ -4,16 +4,20 @@ FROM jenkins/inbound-agent:alpine
 # Switch to root user to install dependencies
 USER root
 
-# Update the package index and install necessary tools one step at a time
-RUN apk update && \
-    apk add --no-cache \
+# Update the Alpine repositories and force a refresh
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.18/main" > /etc/apk/repositories && \
+    apk update && \
+    echo "Alpine repositories updated"
+
+# Install essential tools
+RUN apk add --no-cache \
     bash \
     curl \
     wget \
     unzip \
     python3 \
     py3-pip && \
-    echo "Basic tools installed successfully" 
+    echo "Basic tools installed successfully"
 
 # Install Java (openjdk11)
 RUN apk add --no-cache openjdk11 && \
