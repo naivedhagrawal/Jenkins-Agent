@@ -7,7 +7,7 @@ USER root
 # Install essential build tools and Docker
 RUN apk update && \
     apk add --no-cache \
-    openjdk \
+    openjdk-17-jdk \
     git \
     maven \
     nodejs \
