@@ -4,12 +4,12 @@ FROM jenkins/inbound-agent:alpine
 # Switch to root user to install dependencies
 USER root
 
-# Update the Alpine repositories and force a refresh
+# Set Alpine repository mirror for guaranteed access
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.18/main" > /etc/apk/repositories && \
     apk update && \
     echo "Alpine repositories updated"
 
-# Install essential tools
+# Install basic tools and check each step
 RUN apk add --no-cache \
     bash \
     curl \
