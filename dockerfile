@@ -1,14 +1,27 @@
-FROM jenkins/inbound-agent:alpine
+# Start with a base image for a Jenkins agent
+FROM jenkins/inbound-agent:latest
 
 # Switch to root user to install dependencies
 USER root
 
-# Add the latest repository and install packages
-RUN echo "https://dl-cdn.alpinelinux.org/alpine/latest-stable/main" > /etc/apk/repositories && \
-    echo "https://dl-cdn.alpinelinux.org/alpine/latest-stable/community" >> /etc/apk/repositories && \
-    apk update && \
-    apk add openjdk17 git maven gradle nodejs npm curl unzip make python3 python3-pip python3-venv wget && \
-    rm -rf /var/cache/apk/* /tmp/*
+# Update and install essential build tools in one step
+RUN apt-get update -y && \
+    apt-get install -y \
+    openjdk-17-jdk \
+    git \
+    maven \
+    gradle \
+    nodejs \
+    npm \
+    curl \
+    unzip \
+    make \
+    python3 \
+    python3-pip \
+    python3-venv \
+    wget && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/*
 
 # Install AWS CLI in a Python virtual environment
 RUN python3 -m venv /venv && \
@@ -21,7 +34,7 @@ RUN curl -fsSL https://get.docker.com -o get-docker.sh && \
     rm get-docker.sh
 
 # Add Jenkins user to Docker group
-RUN addgroup -S docker && adduser -S jenkins -G docker
+RUN usermod -aG docker jenkins
 
 # Set environment variables for the tools
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
