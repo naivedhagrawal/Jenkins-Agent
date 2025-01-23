@@ -3,34 +3,48 @@ FROM jenkins/inbound-agent:alpine
 # Switch to root user to install dependencies
 USER root
 
-# Install essential build tools 
+# Update and install essential build tools in one step
 RUN apk update && \
-    apk upgrade && \
-    apk add --no-cache \
-    # git \
-    # maven \
-    # gradle \
-    # nodejs \
-    # npm \
-    # curl \
-    # unzip \
-     python3 \
-     py3-pip \
-    # make 
+    apk add \
+        openjdk17 \
+        git \
+        maven \
+        gradle \
+        nodejs \
+        npm \
+        curl \
+        unzip \
+        make \
+        python3 \
+        py3-pip \
+        py3-venv \
+        wget && \
+    apk clean && \
+    rm -rf /var/cache/apk/* /tmp/*
 
-# Ensure pip is installed for Python 3
-RUN python3 -m ensurepip
+# Install AWS CLI in a Python virtual environment
+RUN python3 -m venv /venv && \
+    /venv/bin/pip install --upgrade pip && \
+    /venv/bin/pip install awscli
 
-# Install awscli
-RUN pip3 install --no-cache --upgrade pip awscli
+# Install Docker (use the official Docker install script for a more secure install)
+RUN curl -fsSL https://get.docker.com -o get-docker.sh && \
+    sh get-docker.sh && \
+    rm get-docker.sh
 
-# Set environment variables for the tools 
-# (Adjust paths if necessary)
-#ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk 
-#ENV PATH=$JAVA_HOME/bin:/opt/gradle/gradle-8.1.1/bin:$PATH
+# Add Jenkins user to Docker group
+RUN usermod -aG docker jenkins
 
-# Expose Jenkins agent port
+# Set environment variables for the tools
+ENV JAVA_HOME=/usr/lib/jvm/openjdk-17
+ENV GRADLE_HOME=/opt/gradle/gradle-8.1.1
+ENV PATH=$JAVA_HOME/bin:$GRADLE_HOME/bin:/venv/bin:$PATH
+
+# Expose the Jenkins agent port (if needed)
 EXPOSE 50000
+
+# Switch back to the Jenkins user
+USER jenkins
 
 # Set entrypoint for Jenkins agent
 ENTRYPOINT ["jenkins-agent"]
