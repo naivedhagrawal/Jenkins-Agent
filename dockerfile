@@ -4,9 +4,10 @@ FROM jenkins/inbound-agent:alpine
 USER root
 
 # Update and install essential build tools in one step
-RUN apk update && \
-    apk add openjdk17 \
-    apk clean && \
+RUN echo "https://dl-cdn.alpinelinux.org/alpine/latest-stable/main" > /etc/apk/repositories && \
+    echo "https://dl-cdn.alpinelinux.org/alpine/latest-stable/community" >> /etc/apk/repositories && \
+    apk update && \
+    apk add openjdk17 && \
     rm -rf /var/cache/apk/* /tmp/*
 
 # Add Jenkins user to Docker group
