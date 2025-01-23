@@ -5,6 +5,7 @@ USER root
 
 # Install essential build tools 
 RUN apk update && \
+    apk upgrade && \
     apk add --no-cache \
     # git \
     # maven \
