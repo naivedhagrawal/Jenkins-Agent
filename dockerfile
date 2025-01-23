@@ -4,10 +4,10 @@ FROM jenkins/inbound-agent:alpine
 # Switch to root user to install dependencies
 USER root
 
-# Install essential build tools in one step
+# Install essential build tools and fix potential issues with package names
 RUN apk update && \
     apk add --no-cache \
-    openjdk17 \
+    openjdk17-jdk \
     git \
     maven \
     gradle \
