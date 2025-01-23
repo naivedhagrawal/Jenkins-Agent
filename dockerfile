@@ -34,7 +34,7 @@ RUN curl -fsSL https://get.docker.com -o get-docker.sh && \
     rm get-docker.sh
 
 # Add Jenkins user to Docker group
-RUN usermod -aG docker jenkins
+RUN addgroup -S docker && adduser -S jenkins -G docker
 
 # Set environment variables for the tools
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
