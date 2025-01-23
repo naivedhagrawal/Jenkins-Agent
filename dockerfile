@@ -1,14 +1,8 @@
-# Use a smaller base image for Jenkins agent
 FROM jenkins/inbound-agent:alpine
 
-# Switch to root user to install dependencies
-USER root
-
-# Install essential build tools and fix potential issues with package names
-
+# Install essential build tools 
 RUN apk update && \
     apk add --no-cache \
-    #openjdk \
     git \
     maven \
     gradle \
@@ -18,27 +12,21 @@ RUN apk update && \
     unzip \
     python3 \
     py3-pip \
-    make \
-    bash && \
-    python3 -m ensurepip && \
-    pip3 install --no-cache --upgrade pip awscli && \
-    rm -rf /var/cache/apk/*
+    make 
 
-# Install Docker using the official script
-RUN curl -fsSL https://get.docker.com | sh
+# Ensure pip is installed for Python 3
+RUN python3 -m ensurepip
 
-# Add Jenkins user to Docker group
-RUN addgroup jenkins docker
+# Install awscli
+RUN pip3 install --no-cache --upgrade pip awscli
 
-# Set environment variables for the tools
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk
-ENV PATH=$JAVA_HOME/bin:/opt/gradle/gradle-8.1.1/bin:/venv/bin:$PATH
+# Set environment variables for the tools 
+# (Adjust paths if necessary)
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk 
+ENV PATH=$JAVA_HOME/bin:/opt/gradle/gradle-8.1.1/bin:$PATH
 
 # Expose Jenkins agent port
 EXPOSE 50000
-
-# Switch back to Jenkins user
-USER jenkins
 
 # Set entrypoint for Jenkins agent
 ENTRYPOINT ["jenkins-agent"]
