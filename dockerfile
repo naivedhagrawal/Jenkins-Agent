@@ -5,8 +5,7 @@ USER root
 
 # Update and install essential build tools in one step
 RUN apk update && \
-    apk add \
-        openjdk17 \
+    apk add openjdk17 \
     apk clean && \
     rm -rf /var/cache/apk/* /tmp/*
 
