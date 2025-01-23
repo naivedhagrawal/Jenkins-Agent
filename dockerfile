@@ -1,5 +1,8 @@
 FROM jenkins/inbound-agent:alpine
 
+# Switch to root user to install dependencies
+USER root
+
 # Install essential build tools 
 RUN apk update && \
     apk add --no-cache \
