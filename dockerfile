@@ -3,24 +3,11 @@ FROM jenkins/inbound-agent:alpine
 # Switch to root user to install dependencies
 USER root
 
-# Update and install essential build tools in one step
+# Add the latest repository and install packages
 RUN echo "https://dl-cdn.alpinelinux.org/alpine/latest-stable/main" > /etc/apk/repositories && \
     echo "https://dl-cdn.alpinelinux.org/alpine/latest-stable/community" >> /etc/apk/repositories && \
     apk update && \
-    apk add openjdk17 && \
-    git \
-    maven \
-    gradle \
-    nodejs \
-    npm \
-    curl \
-    unzip \
-    make \
-    python3 \
-    python3-pip \
-    python3-venv \
-    wget && \
-    apt-get clean && \
+    apk add openjdk17 git maven gradle nodejs npm curl unzip make python3 python3-pip python3-venv wget && \
     rm -rf /var/cache/apk/* /tmp/*
 
 # Install AWS CLI in a Python virtual environment
