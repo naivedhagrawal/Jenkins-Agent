@@ -5,9 +5,11 @@ FROM jenkins/inbound-agent:alpine
 USER root
 
 # Install essential build tools and fix potential issues with package names
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/v3.18/community x86_64" >> /etc/apk/repositories
+
 RUN apk update && \
     apk add --no-cache \
-    openjdk17-jdk \
+    openjdk \
     git \
     maven \
     gradle \
